@@ -1,0 +1,13 @@
+{
+  "name": "product-service",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "handler.js",
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "serverless-offline": "^13.3.3"
+  }
+}
