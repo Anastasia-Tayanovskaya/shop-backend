@@ -9,5 +9,11 @@
   "license": "MIT",
   "devDependencies": {
     "serverless-offline": "^13.3.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.540.0",
+    "@aws-sdk/lib-dynamodb": "^3.540.0",
+    "@aws-sdk/util-dynamodb": "^3.549.0",
+    "uuid": "^9.0.1"
   }
 }
