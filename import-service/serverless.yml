@@ -41,6 +41,11 @@ provider:
             - "s3:*"
           Resource:
             - "arn:aws:s3:::agorbikova-import-service-bucket/*"
+        - Effect: "Allow"
+          Action:
+            - "sqs:SendMessage"
+          Resource:
+            - Fn::ImportValue: eu-north-1-product-service-CatalogItemsQueueArn
 
 
 functions:
@@ -52,6 +57,9 @@ functions:
           method: get
   importFileParser:
     handler: handlers/import-file-parser.importFileParser
+    environment:
+      SQS_QUEUE_URL:
+        Fn::ImportValue: eu-north-1-product-service-CatalogItemsQueueUrl
     events:
       - s3:
           existing: true
