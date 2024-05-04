@@ -25,9 +25,77 @@ provider:
   runtime: nodejs18.x
   stage: dev
   region: eu-north-1
+  environment:
+    DYNAMODB_PRODUCTS_TABLE: ProductsDB
+    DYNAMODB_STOCK_TABLE: StockDB
+    REGION: ${self:provider.region}
+    SQS_URL:
+      Ref: CatalogItemsQueue
+    SNS_TOPIC_ARN:
+      Ref: CreateProductSNSTopic
+
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:*
+          Resource:
+            - "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.DYNAMODB_PRODUCTS_TABLE}"
+            - "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.DYNAMODB_STOCK_TABLE}"
+        - Effect: Allow
+          Action: "sqs:*"
+          Resource:
+            - Fn::GetAtt: [ CatalogItemsQueue, Arn ]
+        - Effect: Allow
+          Action: "sns:*"
+          Resource:
+            Ref: CreateProductSNSTopic
+        - Effect: Allow
+          Action: "sns:Publish"
+          Resource:
+            Ref: EmailSubscription
 
 plugins:
   - serverless-offline
+
+
+resources:
+  Resources:
+    CatalogItemsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: catalogItemsQueue
+
+    CreateProductSNSTopic:
+      Type : AWS::SNS::Topic
+      Properties:
+        TopicName: createProductSnsTopic
+
+    EmailSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        Endpoint: a.tayanovskaya@gmail.com
+        TopicArn:
+          Ref: CreateProductSNSTopic
+
+  Outputs:
+    CatalogItemsQueueArn:
+      Description: "Arn of created SQS queue from Product Service"
+      Value:
+        Fn::GetAtt:
+          - CatalogItemsQueue
+          - Arn
+      Export:
+        Name: ${self:provider.region}-${self:service}-CatalogItemsQueueArn
+    CatalogItemsQueueUrl:
+      Description: "Url of created SQS queue from Product Service"
+      Value:
+        Ref: CatalogItemsQueue
+      Export:
+        Name: ${self:provider.region}-${self:service}-CatalogItemsQueueUrl
 
 functions:
   getProductsList:
@@ -42,3 +110,21 @@ functions:
       - http:
           path: products/{productId}
           method: get
+  createProduct:
+    handler: handlers/create-product.createProduct
+    events:
+      - http:
+          path: products
+          method: post
+          cors: true
+  catalogBatchProcess:
+    handler: handlers/catalog-batch-process.catalogBatchProcess
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - CatalogItemsQueue
+              - Arn
+          batchSize: 5
+          enabled: true
+
