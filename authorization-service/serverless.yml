@@ -1,0 +1,19 @@
+service: authorization-service
+frameworkVersion: "3"
+
+plugins:
+  - serverless-dotenv-plugin
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+
+# you can overwrite defaults here
+  stage: dev
+  region: eu-north-1
+
+
+functions:
+  basicAuthorizer:
+    handler: basic-authorizer.basicAuthorizer
+
