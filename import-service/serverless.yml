@@ -55,6 +55,12 @@ functions:
       - http:
           path: /import
           method: get
+          cors: true
+          authorizer:
+            arn: "arn:aws:lambda:eu-north-1:905418022089:function:authorization-service-dev-basicAuthorizer"
+            type: token
+            resultTtlInSeconds: 0
+            identitySource: method.request.header.Authorization
   importFileParser:
     handler: handlers/import-file-parser.importFileParser
     environment:
@@ -67,3 +73,15 @@ functions:
           event: s3:ObjectCreated:*
           rules:
             - prefix: uploaded/
+
+resources:
+  Resources:
+    Unauthorized:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          "gatewayresponse.header.Access-Control-Allow-Origin": "'*'"
+          "gatewayresponse.header.Access-Control-Allow-Headers": "'*'"
+        ResponseType: "DEFAULT_4XX"
+        RestApiId:
+          Ref: "ApiGatewayRestApi"

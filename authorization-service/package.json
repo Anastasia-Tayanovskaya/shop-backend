@@ -1,0 +1,15 @@
+{
+  "name": "authorization-service",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "serverless-dotenv-plugin": "^6.0.0"
+  }
+}
